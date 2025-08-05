@@ -1,0 +1,20 @@
+# IDEs
+.idea/
+*.iml
+
+# Build
+/target/
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+mysql-data/
+
+# Arquivos temporários
+*.tmp
+*.swp

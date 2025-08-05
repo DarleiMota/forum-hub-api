@@ -34,9 +34,10 @@ public class Topico {
     @ManyToOne
     private Usuario autor;
 
-    @OneToMany
+    @ManyToOne
     private Curso curso;
 
-    @OneToMany(mappedBy = "topico")
+    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL)
+    @OrderBy("dataCriacao ASC")
     private List<Resposta> respostas;
 }
