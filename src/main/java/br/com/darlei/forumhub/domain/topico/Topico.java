@@ -32,9 +32,11 @@ public class Topico {
     private StatusTopico status;
 
     @ManyToOne
+    @JoinColumn(name = "autor_id")
     private Usuario autor;
 
     @ManyToOne
+    @JoinColumn(name = "curso_id")
     private Curso curso;
 
     @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL)

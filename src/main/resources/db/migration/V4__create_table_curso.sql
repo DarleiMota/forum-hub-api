@@ -1,0 +1,5 @@
+CREATE TABLE curso (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID())),
+    nome_curso VARCHAR(100) NOT NULL,
+    categoria VARCHAR(100) NOT NULL
+);

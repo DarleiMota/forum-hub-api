@@ -1,6 +1,5 @@
 package br.com.darlei.forumhub.domain.perfil;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +18,5 @@ public class Perfil {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private String nome;
+    private String nomePerfil;
 }

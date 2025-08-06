@@ -1,0 +1,4 @@
+CREATE TABLE perfil (
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID())),
+    nome_perfil VARCHAR(100) NOT NULL
+);

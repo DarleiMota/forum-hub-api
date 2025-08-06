@@ -29,8 +29,10 @@ public class Resposta {
     private Boolean solucao;
 
     @ManyToOne
-    private Topico topico;
+    @JoinColumn(name = "autor_id")
+    private Usuario autor;
 
     @ManyToOne
-    private Usuario autor;
+    @JoinColumn(name = "topico_id")
+    private Topico topico;
 }
