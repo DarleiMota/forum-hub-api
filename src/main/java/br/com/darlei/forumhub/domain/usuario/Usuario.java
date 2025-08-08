@@ -20,7 +20,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private String nome;
+    private String nomeUsuario;
     private String email;
     private String senha;
 
