@@ -31,8 +31,4 @@ public class Usuario {
             inverseJoinColumns = @JoinColumn(name = "perfil_id")
     )
     private Set<Perfil> perfis;
-
-
-
-
 }
