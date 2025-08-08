@@ -21,42 +21,42 @@ public class ForumhubApplication {
 
 		SpringApplication.run(ForumhubApplication.class, args);
 	}
-
-	@Bean
-	CommandLineRunner run(
-			TopicoRepository topicoRepository,
-			UsuarioRepository usuarioRepository,
-			CursoRepository cursoRepository
-	) {
-		return args -> {
-
-			Usuario autor = Usuario.builder()
-					.nomeUsuario("Fulano")
-					.email("fulano@email.com")
-					.senha("123456")
-					.build();
-
-			Curso curso = Curso.builder()
-					.nomeCurso("Spring Boot")
-					.categoria("Programação")
-					.build();
-
-
-			usuarioRepository.save(autor);
-			cursoRepository.save(curso);
-
-
-			Topico topico = Topico.builder()
-					.titulo("Dúvida sobre Enum")
-					.mensagem("Como funciona o @Enumerated no Spring?")
-					.dataCriacao(LocalDateTime.now())
-					.status(StatusTopico.NAO_RESPONDIDO)
-					.autor(autor)
-					.curso(curso)
-					.build();
-
-			topicoRepository.save(topico);
-			System.out.println("Tópico salvo com sucesso!");
-		};
-	}
+//
+//	@Bean
+//	CommandLineRunner run(
+//			TopicoRepository topicoRepository,
+//			UsuarioRepository usuarioRepository,
+//			CursoRepository cursoRepository
+//	) {
+//		return args -> {
+//
+//			Usuario autor = Usuario.builder()
+//					.nomeUsuario("Fulano")
+//					.email("fulano@email.com")
+//					.senha("123456")
+//					.build();
+//
+//			Curso curso = Curso.builder()
+//					.nomeCurso("Spring Boot")
+//					.categoria("Programação")
+//					.build();
+//
+//
+//			usuarioRepository.save(autor);
+//			cursoRepository.save(curso);
+//
+//
+//			Topico topico = Topico.builder()
+//					.titulo("Dúvida sobre Enum")
+//					.mensagem("Como funciona o @Enumerated no Spring?")
+//					.dataCriacao(LocalDateTime.now())
+//					.status(StatusTopico.NAO_RESPONDIDO)
+//					.autor(autor)
+//					.curso(curso)
+//					.build();
+//
+//			topicoRepository.save(topico);
+//			System.out.println("Tópico salvo com sucesso!");
+//		};
+//	}
 }
