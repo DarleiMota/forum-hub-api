@@ -6,16 +6,16 @@ import br.com.darlei.forumhub.domain.topico.Topico;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TopicoResponseDTO (
-    UUID id,
-    String titulo,
-    String mensagem,
-    LocalDateTime dataCriacao,
-    StatusTopico status,
-    String autor,
-    String curso) {
-
-    public TopicoResponseDTO(Topico topico){
+public record TopicoResponseDTO(
+        UUID id,
+        String titulo,
+        String mensagem,
+        LocalDateTime dataCriacao,
+        StatusTopico status,
+        String autor,
+        String curso
+) {
+    public TopicoResponseDTO(Topico topico) {
         this(
                 topico.getId(),
                 topico.getTitulo(),
@@ -24,6 +24,6 @@ public record TopicoResponseDTO (
                 topico.getStatus(),
                 topico.getAutor().getNomeUsuario(),
                 topico.getCurso().getNomeCurso()
-                );
+        );
     }
 }

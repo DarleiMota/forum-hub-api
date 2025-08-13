@@ -16,10 +16,15 @@ spring:
           preferred_uuid_jdbc_type: BINARY  # UUID <-> BINARY(16) nos IDs
         format_sql: true
 
-  spring:
-    flyway:
-      url: jdbc:mysql://localhost:3306/forumhub
-      user: user
-      password: password
-      locations: classpath:db/migration
-      repair-on-migrate: true
+  flyway:
+    url: jdbc:mysql://localhost:3306/forumhub
+    user: user
+    password: password
+    locations: classpath:db/migration
+    repair-on-migrate: true
+
+api:
+  security:
+    token:
+      secret: seuSegredoMuitoSecretoAqui123!
+      issuer: forumhub-api
