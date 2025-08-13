@@ -24,8 +24,6 @@ public class DataLoader implements CommandLineRunner {
         criarPerfilSeNaoExistir("ROLE_PROFESSOR");
         criarPerfilSeNaoExistir("ROLE_ALUNO");
 
-        // Adicional: criar usuário admin padrão se necessário
-        // criarUsuarioAdminPadrao();
     }
 
     private void criarPerfilSeNaoExistir(String nomePerfil) {
