@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -34,12 +35,15 @@ public class UsuarioService {
             throw new IllegalArgumentException("Email já cadastrado");
         }
 
-        Set<Perfil> perfis = dados.perfisIds().stream()
+        Set<Perfil> perfis =(dados.perfisIds() != null)? dados.perfisIds()
+                .stream()
                 .map(perfilRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet())
+                : new HashSet<>();
 
+        // Valida quando id está vazio adicionando
         if (perfis.isEmpty()) {
             perfis.add(perfilRepository.findByNomePerfil("ROLE_USUARIO")
                     .orElseThrow(() -> new IllegalStateException("Perfil padrão não encontrado")));
