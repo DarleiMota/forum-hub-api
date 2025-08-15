@@ -21,6 +21,7 @@ public class AutenticacaoController {
     @Autowired
     private AutenticacaoService autenticacaoService;
 
+    // Realiza Login e retorna token JWT
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid LoginRequestDTO dados) {
         TokenResponseDTO token = autenticacaoService.login(dados);

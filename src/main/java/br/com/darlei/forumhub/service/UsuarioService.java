@@ -30,21 +30,34 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dados) {
+
+        // Validando Email
         if (usuarioRepository.existsByEmail(dados.email())) {
+            System.out.println("Tentativa de cadastro com email existente: "+ dados.email());
             throw new IllegalArgumentException("Email já cadastrado");
+
         }
 
+        // Buscar Perfil ( ou atribuir ROLE_ALUNO como padrão)
         Set<Perfil> perfis = dados.perfisIds().stream()
-                .map(perfilRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(id -> perfilRepository.findById(id)
+                        .orElseThrow(()->{
+                            System.out.println("Perfil não encontrado: " + id);
+                            return new RuntimeException("Perfil inválido");
+                        }))
                 .collect(Collectors.toSet());
 
+
         if (perfis.isEmpty()) {
-            perfis.add(perfilRepository.findByNomePerfil("ROLE_USUARIO")
-                    .orElseThrow(() -> new IllegalStateException("Perfil padrão não encontrado")));
+            Perfil padrao = perfilRepository.findByNomePerfil("ROLE_ALUNO")
+                    .orElseThrow(() -> {
+                        System.out.println("Perfil padrão ROLE_ALUNO não configurado!");
+                        return new RuntimeException("Erro interno no servidor");
+                    });
+            perfis.add(padrao);
         }
 
+        // Cria e salva usuário
         Usuario usuario = new Usuario();
         usuario.setNomeUsuario(dados.nomeUsuario());
         usuario.setEmail(dados.email());
