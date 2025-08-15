@@ -2,11 +2,13 @@ package br.com.darlei.forumhub.config;
 
 import br.com.darlei.forumhub.domain.perfil.Perfil;
 import br.com.darlei.forumhub.repository.PerfilRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Configuration
 @Profile("dev") // Só executa em ambiente de desenvolvimento
 public class DataLoader implements CommandLineRunner {
@@ -23,16 +25,20 @@ public class DataLoader implements CommandLineRunner {
         criarPerfilSeNaoExistir("ROLE_ADMIN");
         criarPerfilSeNaoExistir("ROLE_PROFESSOR");
         criarPerfilSeNaoExistir("ROLE_ALUNO");
+        log.info("Perfis básicos verificados/criados");
+
 
     }
 
     private void criarPerfilSeNaoExistir(String nomePerfil) {
-        if (!perfilRepository.existsByNomePerfil(nomePerfil)) {
-            Perfil perfil = Perfil.builder()
-                    .nomePerfil(nomePerfil)
-                    .build();
-            perfilRepository.save(perfil);
-            System.out.println("Perfil criado: " + nomePerfil);
-        }
+        perfilRepository.findB yNomePerfil(nomePerfil)
+                .orElseGet(() -> {
+                    Perfil novoPerfil = Perfil.builder()
+                            .nomePerfil(nomePerfil)
+                            .build();
+                    Perfil perfilSalvo = perfilRepository.save(novoPerfil);
+                    log.info("Perfil criado: {}", nomePerfil);
+                    return perfilSalvo;
+                });
     }
-    }
+}
