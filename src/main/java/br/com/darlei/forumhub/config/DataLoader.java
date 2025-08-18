@@ -31,7 +31,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void criarPerfilSeNaoExistir(String nomePerfil) {
-        perfilRepository.findB yNomePerfil(nomePerfil)
+        perfilRepository.findByNomePerfil(nomePerfil)
                 .orElseGet(() -> {
                     Perfil novoPerfil = Perfil.builder()
                             .nomePerfil(nomePerfil)
