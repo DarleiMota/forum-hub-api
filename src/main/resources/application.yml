@@ -26,5 +26,6 @@ spring:
 api:
   security:
     token:
-      secret: seuSegredoMuitoSecretoAqui123!
+      secret: "umSegredoSuperForteComExatos32Caracteres123456!"
       issuer: forumhub-api
+      expiration-hours: 24
