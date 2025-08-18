@@ -7,31 +7,33 @@ import br.com.darlei.forumhub.dto.usuario.UsuarioResponseDTO;
 import br.com.darlei.forumhub.repository.PerfilRepository;
 import br.com.darlei.forumhub.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService {
 
-    private static final String PERFIL_ALUNO = "ROLE_ALUNO";
+    private final UsuarioRepository usuarioRepository;
+    private final PerfilRepository perfilRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private PerfilRepository perfilRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    // CADASTRO
     @Transactional
     public UsuarioResponseDTO cadastrar(UsuarioRequestDTO dados) {
-        validarEmailExistente(dados.email());
+        validarEmailUnico(dados.email());
 
         Set<Perfil> perfis = carregarPerfis(dados.perfisIds());
         Usuario usuario = construirUsuario(dados, perfis);
@@ -39,36 +41,77 @@ public class UsuarioService {
         return new UsuarioResponseDTO(usuarioRepository.save(usuario));
     }
 
-    private Set<Perfil> carregarPerfis(Set<UUID> perfisIds) {
-        Set<Perfil> perfis = new HashSet<>();
-
-        // Quando id for nulo ou vazio atribui um perfil ao aluno
-        if (perfisIds == null || perfisIds.isEmpty()) {
-            perfis.add(obterPerfilAluno());
-            return perfis;
-        }
-
-        // Processa os IDs quando fornecido
-        for (UUID perfilId : perfisIds) {
-            perfilRepository.findById(perfilId)
-                    .ifPresentOrElse(
-                            perfis::add,
-                            () -> { throw new IllegalArgumentException("Perfil com ID " + perfilId + " não encontrado"); }
-                    );
-        }
-
-        return perfis;
+    // BUSCA POR ID
+    public UsuarioResponseDTO buscarPorId(UUID id) {
+        return usuarioRepository.findById(id)
+                .map(UsuarioResponseDTO::new)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado"
+                ));
     }
 
-    private Perfil obterPerfilAluno() {
-        return perfilRepository.findByNomePerfil(PERFIL_ALUNO)
-                .orElseThrow(() -> new IllegalStateException("Perfil de aluno (" + PERFIL_ALUNO + ") não está cadastrado no sistema"));
+    // LISTAGEM
+    public Page<UsuarioResponseDTO> listarTodos(Pageable pageable) {
+        return usuarioRepository.findAll(pageable).map(UsuarioResponseDTO::new);
     }
 
-    private void validarEmailExistente(String email) {
+    // ATUALIZAÇÃO
+    @Transactional
+    public UsuarioResponseDTO atualizar(UUID id, UsuarioRequestDTO dados) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado"
+                ));
+
+        if (!usuario.getEmail().equals(dados.email())) {
+            validarEmailUnico(dados.email());
+        }
+
+        Set<Perfil> perfis = carregarPerfis(dados.perfisIds());
+
+        usuario.setNomeUsuario(dados.nomeUsuario());
+        usuario.setEmail(dados.email());
+        usuario.setSenha(passwordEncoder.encode(dados.senha()));
+        usuario.setPerfis(perfis);
+
+        return new UsuarioResponseDTO(usuarioRepository.save(usuario));
+    }
+
+    // REMOÇÃO
+    @Transactional
+    public void remover(UUID id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Usuário não encontrado"
+            );
+        }
+        usuarioRepository.deleteById(id);
+    }
+
+    // MÉTODOS AUXILIARES
+    private void validarEmailUnico(String email) {
         if (usuarioRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email já cadastrado");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email já cadastrado"
+            );
         }
+    }
+
+    private Set<Perfil> carregarPerfis(Set<UUID> perfisIds) {
+        if (perfisIds == null || perfisIds.isEmpty()) {
+            return Set.of(perfilRepository.findByNomePerfil("ROLE_ALUNO")
+                    .orElseThrow(() -> new IllegalStateException("Perfil ALUNO não encontrado")));
+        }
+
+        return perfisIds.stream()
+                .map(perfilRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
     }
 
     private Usuario construirUsuario(UsuarioRequestDTO dados, Set<Perfil> perfis) {
