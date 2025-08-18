@@ -3,10 +3,8 @@ package br.com.darlei.forumhub.controller;
 import br.com.darlei.forumhub.dto.usuario.UsuarioRequestDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioResponseDTO;
 import br.com.darlei.forumhub.service.UsuarioService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,6 +22,7 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
+    //CADASTRAR USUÁRIO
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> cadastrar(
             @RequestBody @Valid UsuarioRequestDTO dados,
@@ -34,17 +33,20 @@ public class UsuarioController {
         return ResponseEntity.created(uri).body(response);
     }
 
+    // BUSCAR POR ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
+    // LISTAGEM TODOS PAGINADOS
     @GetMapping
     public ResponseEntity<Page<UsuarioResponseDTO>> listarTodos(
             @PageableDefault Pageable pageable) {
         return ResponseEntity.ok(usuarioService.listarTodos(pageable));
     }
 
+    // ATUALIZAR USUARIO
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable UUID id,
@@ -52,6 +54,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.atualizar(id, dados));
     }
 
+    // REMOVER USUARIO
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable UUID id) {
         usuarioService.remover(id);
