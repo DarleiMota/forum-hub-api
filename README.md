@@ -11,21 +11,6 @@
   <img src="https://img.shields.io/badge/Lombok-1.18-orange?logo=lombok&logoColor=white"/>
 </p>
 
-
-___
-
-## 📑 Sumário
-
-- [Sobre o Projeto](#fórumhub)
-- [Tecnologias](#-tecnologias)
-- [Como Executar](#como-executar)
-- [Endpoints](#endpoints)
-- [Modelo ER](#modelo-er)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Segurança](#segurança)
-- [Contribuição](#contribuição)
-- [Observações](#observações)
-
 ___
 
 ## 📖 Sobre o projeto
@@ -51,32 +36,6 @@ ___
 - Docker & Docker Compose
 - Flyway (migrações do banco)
 - Spring Security + JWT
-
----
-
-
-## ▶️ Como Executar
-
-### Usando Docker Compose (recomendado)
-
-1. Suba o container do MySQL:
-  ```bash
-  docker compose up -d
-  ```
-2. Execute a aplicação (em outro terminal):
-  ```bash
-  ./mvnw spring-boot:run
-  ```
-3. Acesse no navegador:
-  [http://localhost:8080](http://localhost:8080)
-
-### Sem Docker
-
-1. Certifique-se de ter o MySQL rodando localmente e configurado conforme o `application.yml`.
-2. Execute:
-  ```bash
-  ./mvnw spring-boot:run
-  ```
 
 ---
 
@@ -172,6 +131,30 @@ Authorization: Bearer SEU_TOKEN_AQUI
 
 ---
 
+## ▶️ Como Executar
+
+### Usando Docker Compose (recomendado)
+
+1. Suba o container do MySQL:
+  ```bash
+  docker compose up -d
+  ```
+2. Execute a aplicação (em outro terminal):
+  ```bash
+  ./mvnw spring-boot:run
+  ```
+3. Acesse no navegador:
+  [http://localhost:8080](http://localhost:8080)
+
+### Sem Docker
+
+1. Certifique-se de ter o MySQL rodando localmente e configurado conforme o `application.yml`.
+2. Execute:
+  ```bash
+  ./mvnw spring-boot:run
+  ```
+___
+
 ## 🤝 Contribuição
 
 Contribuições são sempre bem-vindas!
@@ -188,6 +171,11 @@ ___
 - Banco em MySQL
 - Docker Compose já configurado
 - Endpoints completos documentados acima
+
+
+## ✅ Cobertura de Testes
+
+Todas as rotas da API foram testadas manualmente utilizando o [Insomnia](https://insomnia.rest/), garantindo o funcionamento de autenticação, CRUD de usuários, cursos e tópicos, além das regras de negócio e segurança (JWT).
 
 ### Links Úteis
 
