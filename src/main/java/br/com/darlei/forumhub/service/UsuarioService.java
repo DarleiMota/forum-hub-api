@@ -2,13 +2,13 @@ package br.com.darlei.forumhub.service;
 
 import br.com.darlei.forumhub.domain.perfil.Perfil;
 import br.com.darlei.forumhub.domain.usuario.Usuario;
+import br.com.darlei.forumhub.dto.usuario.AtualizacaoUsuarioDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioRequestDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioResponseDTO;
 import br.com.darlei.forumhub.repository.PerfilRepository;
 import br.com.darlei.forumhub.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -58,22 +57,24 @@ public class UsuarioService {
 
     // ATUALIZAÇÃO
     @Transactional
-    public UsuarioResponseDTO atualizar(UUID id, UsuarioRequestDTO dados) {
+    public UsuarioResponseDTO atualizar(UUID id, AtualizacaoUsuarioDTO dados) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Usuário não encontrado"
-                ));
+                        HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         if (!usuario.getEmail().equals(dados.email())) {
             validarEmailUnico(dados.email());
         }
 
-        Set<Perfil> perfis = carregarPerfis(dados.perfisIds());
+        // Converter perfis recebidos no DTO
+        Set<Perfil> perfis = dados.perfis().stream()
+                .map(nome -> perfilRepository.findByNomePerfil(nome)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Perfil não encontrado: " + nome)))
+                .collect(Collectors.toSet());
 
         usuario.setNomeUsuario(dados.nomeUsuario());
         usuario.setEmail(dados.email());
-        usuario.setSenha(passwordEncoder.encode(dados.senha()));
         usuario.setPerfis(perfis);
 
         return new UsuarioResponseDTO(usuarioRepository.save(usuario));

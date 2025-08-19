@@ -1,5 +1,7 @@
 package br.com.darlei.forumhub.controller;
 
+import br.com.darlei.forumhub.domain.usuario.Usuario;
+import br.com.darlei.forumhub.dto.usuario.AtualizacaoUsuarioDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioRequestDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioResponseDTO;
 import br.com.darlei.forumhub.service.UsuarioService;
@@ -50,8 +52,10 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(
             @PathVariable UUID id,
-            @RequestBody @Valid UsuarioRequestDTO dados) {
-        return ResponseEntity.ok(usuarioService.atualizar(id, dados));
+            @RequestBody @Valid AtualizacaoUsuarioDTO dados) {
+
+        UsuarioResponseDTO response = usuarioService.atualizar(id, dados);
+        return ResponseEntity.ok(response);
     }
 
     // REMOVER USUARIO
