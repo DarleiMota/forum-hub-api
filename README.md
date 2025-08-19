@@ -177,6 +177,15 @@ ___
 
 Todas as rotas da API foram testadas manualmente utilizando o [Insomnia](https://insomnia.rest/), garantindo o funcionamento de autenticação, CRUD de usuários, cursos e tópicos, além das regras de negócio e segurança (JWT).
 
+## 🚧 Futuras Implementações
+
+- Implementação das rotas de respostas (endpoint para criar, listar, atualizar e deletar respostas nos tópicos)
+- Testes automatizados das funcionalidades principais
+- Melhorias na documentação da API (ex: OpenAPI/Swagger)
+- Possibilidade de integração com frontend
+
+> Observação: A entidade de respostas já está mapeada no banco de dados, mas as rotas ainda não foram implementadas na API.
+
 ### Links Úteis
 
 - [Documentação Spring Boot](https://spring.io/projects/spring-boot)
