@@ -20,43 +20,62 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    public SecurityFilter(TokenService tokenService, UsuarioRepository usuarioRepository) {
+        this.tokenService = tokenService;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        String tokenJWT = recuperarToken(request);
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+        // Ignora rotas públicas (incluindo /auth/login)
+        if (isPublicRoute(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        if (tokenJWT != null) {
-            try {
-                String subject = tokenService.getSubject(tokenJWT);
-                Usuario usuario = usuarioRepository.findByEmail(subject)
-                        .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        var tokenJWT = recuperarToken(request);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                usuario,
-                                null,
-                                usuario.getAuthorities());
+        if (tokenJWT == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token não fornecido");
+            return;
+        }
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (RuntimeException e) {
-                // Logar o erro se necessário
-                logger.error("Erro na autenticação via JWT", e);
-            }
+        try {
+            var subject = tokenService.getSubject(tokenJWT);
+            var usuario = usuarioRepository.findByEmail(subject)
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    usuario, null, usuario.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (RuntimeException e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
+            return;
         }
 
         filterChain.doFilter(request, response);
     }
 
+    private boolean isPublicRoute(HttpServletRequest request) {
+        return request.getRequestURI().equals("/auth/login")
+                || request.getRequestURI().equals("/usuarios")
+                || request.getRequestURI().startsWith("/swagger")
+                || request.getRequestURI().startsWith("/v3/api-docs");
+    }
+
     private String recuperarToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null) {
-            return authorizationHeader.replace("Bearer ", "");
+        var header = request.getHeader("Authorization");
+        if (header != null) {
+            return header.replace("Bearer ", "").trim();
         }
         return null;
     }

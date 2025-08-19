@@ -26,12 +26,10 @@ public class DataLoader implements CommandLineRunner {
         criarPerfilSeNaoExistir("ROLE_PROFESSOR");
         criarPerfilSeNaoExistir("ROLE_ALUNO");
         log.info("Perfis básicos verificados/criados");
-
-
     }
 
     private void criarPerfilSeNaoExistir(String nomePerfil) {
-        perfilRepository.findB yNomePerfil(nomePerfil)
+        perfilRepository.findByNomePerfil(nomePerfil)
                 .orElseGet(() -> {
                     Perfil novoPerfil = Perfil.builder()
                             .nomePerfil(nomePerfil)

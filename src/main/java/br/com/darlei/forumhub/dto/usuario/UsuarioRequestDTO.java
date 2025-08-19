@@ -11,13 +11,13 @@ public record UsuarioRequestDTO(
         @NotBlank String nomeUsuario,
         @NotBlank @Email String email,
         @NotBlank @Size(min = 6) String senha,
-        @NotNull Set<UUID> perfisIds
+        Set<UUID> perfisIds
 ) {
     public Usuario toEntity(Set<Perfil> perfis) {
         return Usuario.builder()
                 .nomeUsuario(this.nomeUsuario)
-                .email(this.email)
-                .senha(this.senha) // A senha será codificada no service
+                .email(this.email) // validado no serviço
+                .senha(this.senha) // validado no serviço
                 .perfis(perfis)
                 .build();
     }

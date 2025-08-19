@@ -5,37 +5,36 @@ import br.com.darlei.forumhub.dto.usuario.LoginRequestDTO;
 import br.com.darlei.forumhub.dto.usuario.TokenResponseDTO;
 import br.com.darlei.forumhub.dto.usuario.UsuarioResponseDTO;
 import br.com.darlei.forumhub.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 @Service
-public class AutenticacaoService {
+@RequiredArgsConstructor
+public class AutenticacaoService implements UserDetailsService {
 
-    @Autowired
-    private AuthenticationManager manager;
+    private final UsuarioRepository usuarioRepository;
+    private final TokenService tokenService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+    }
 
-    @Autowired
-    private TokenService tokenService;
+    public TokenResponseDTO login(LoginRequestDTO dados, AuthenticationManager authenticationManager) {
+        var authenticationToken = new UsernamePasswordAuthenticationToken(
+                dados.email(), dados.senha());
 
-    public TokenResponseDTO login(LoginRequestDTO dados) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
+        var authentication = authenticationManager.authenticate(authenticationToken);
+        var usuario = (Usuario) authentication.getPrincipal();
+        var tokenJWT = tokenService.gerarToken(usuario);
 
-        Authentication authentication = manager.authenticate(authenticationToken);
-
-        Usuario usuario = (Usuario) authentication.getPrincipal();
-        String tokenJWT = tokenService.gerarToken(usuario);
-
-        // Criar o DTO de resposta do usuário
-        UsuarioResponseDTO usuarioResponse = new UsuarioResponseDTO(usuario);
-
-        // Retornar os três parâmetros exigidos pelo record
-        return new TokenResponseDTO(tokenJWT, "Bearer", usuarioResponse);
+        return new TokenResponseDTO(tokenJWT, "Bearer", new UsuarioResponseDTO(usuario));
     }
 }

@@ -1,24 +1,19 @@
-
 package br.com.darlei.forumhub.controller;
 
-import br.com.darlei.forumhub.domain.topico.Topico;
 import br.com.darlei.forumhub.domain.topico.StatusTopico;
 import br.com.darlei.forumhub.domain.usuario.Usuario;
 import br.com.darlei.forumhub.dto.topico.TopicoRequestDTO;
 import br.com.darlei.forumhub.dto.topico.TopicoResponseDTO;
 import br.com.darlei.forumhub.service.TopicoService;
-//import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -32,44 +27,48 @@ public class TopicoController {
     @Autowired
     private TopicoService topicoService;
 
+    // ----------------- CREATE -----------------
     @PostMapping
     public ResponseEntity<TopicoResponseDTO> cadastrar(
             @RequestBody @Valid TopicoRequestDTO dados,
             UriComponentsBuilder builder,
-            @AuthenticationPrincipal Usuario usuarioLogado) {
+            Authentication authentication) {
 
-        dados = new TopicoRequestDTO(
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+
+        // Atualiza o DTO com o ID do usuário logado
+        TopicoRequestDTO request = new TopicoRequestDTO(
                 dados.titulo(),
                 dados.mensagem(),
                 dados.cursoId(),
-                usuarioLogado.getId() // Usa o ID do usuário logado
+                usuarioLogado.getId()
         );
 
-        Topico topico = topicoService.cadastrarTopico(dados);
+        var topico = topicoService.cadastrarTopico(request);
         var uri = builder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
         return ResponseEntity.created(uri).body(new TopicoResponseDTO(topico));
     }
 
+    // ----------------- READ -----------------
     @GetMapping("/{id}")
-    public ResponseEntity<TopicoResponseDTO> buscarTopico(@PathVariable UUID id) {
-        Topico topico = topicoService.buscarPorId(id);
+    public ResponseEntity<TopicoResponseDTO> buscarPorId(@PathVariable UUID id) {
+        var topico = topicoService.buscarPorId(id);
         return ResponseEntity.ok(new TopicoResponseDTO(topico));
     }
 
     @GetMapping
-    public ResponseEntity<Page<TopicoResponseDTO>> listarTopicos(
+    public ResponseEntity<Page<TopicoResponseDTO>> listarTodos(
             @PageableDefault(sort = "titulo", direction = Sort.Direction.ASC) Pageable pageable) {
-
-        Page<TopicoResponseDTO> topicos = topicoService.listarTodos(pageable);
+        var topicos = topicoService.listarTodos(pageable);
         return ResponseEntity.ok(topicos);
     }
 
+    // ----------------- FILTROS -----------------
     @GetMapping("/por-curso/{nomeCurso}")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorCurso(
             @PathVariable String nomeCurso,
             @PageableDefault(sort = "dataCriacao", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        Page<TopicoResponseDTO> topicos = topicoService.listarPorCurso(nomeCurso, pageable);
+        var topicos = topicoService.listarPorCurso(nomeCurso, pageable);
         return ResponseEntity.ok(topicos);
     }
 
@@ -77,8 +76,7 @@ public class TopicoController {
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorStatus(
             @PathVariable StatusTopico status,
             @PageableDefault(sort = "dataCriacao") Pageable pageable) {
-
-        Page<TopicoResponseDTO> topicos = topicoService.listarPorStatus(status, pageable);
+        var topicos = topicoService.listarPorStatus(status, pageable);
         return ResponseEntity.ok(topicos);
     }
 
@@ -86,39 +84,40 @@ public class TopicoController {
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorAutor(
             @PathVariable UUID autorId,
             @PageableDefault(sort = "dataCriacao") Pageable pageable) {
-
-        Page<TopicoResponseDTO> topicos = topicoService.listarPorAutor(autorId, pageable);
+        var topicos = topicoService.listarPorAutor(autorId, pageable);
         return ResponseEntity.ok(topicos);
     }
 
-    @GetMapping("/buscar/")
+    @GetMapping("/buscar")
     public ResponseEntity<Page<TopicoResponseDTO>> buscarPorTexto(
             @RequestParam String texto,
             @PageableDefault(sort = "dataCriacao") Pageable pageable) {
-
-        Page<TopicoResponseDTO> topicos = topicoService.buscarPorTexto(texto, pageable);
+        var topicos = topicoService.buscarPorTexto(texto, pageable);
         return ResponseEntity.ok(topicos);
     }
 
     @GetMapping("/filtro-combinado")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorCursoEStatus(
-            @RequestParam @NotBlank String nomeCurso,
-            @RequestParam @NotNull StatusTopico status,
-            @PageableDefault Pageable pageable){
-
-        Page<TopicoResponseDTO> topicos = topicoService.listarPorCursoEStatus(nomeCurso, status, pageable);
+            @RequestParam String nomeCurso,
+            @RequestParam StatusTopico status,
+            @PageableDefault Pageable pageable) {
+        var topicos = topicoService.listarPorCursoEStatus(nomeCurso, status, pageable);
         return ResponseEntity.ok(topicos);
     }
 
+    // ----------------- UPDATE -----------------
     @PutMapping("/{id}")
     public ResponseEntity<TopicoResponseDTO> atualizarTopico(
             @PathVariable UUID id,
-            @RequestBody @Valid TopicoRequestDTO dados) {
+            @RequestBody @Valid TopicoRequestDTO dados,
+            Authentication authentication) {
 
-        TopicoResponseDTO topicoAtualizado = topicoService.atualizarTopico(id, dados);
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+        var topicoAtualizado = topicoService.atualizarTopico(id, dados, usuarioLogado);
         return ResponseEntity.ok(topicoAtualizado);
     }
 
+    // ----------------- DELETE -----------------
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirTopico(@PathVariable UUID id) {
         topicoService.excluirTopico(id);

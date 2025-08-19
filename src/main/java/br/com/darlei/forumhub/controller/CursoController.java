@@ -2,6 +2,7 @@ package br.com.darlei.forumhub.controller;
 
 import br.com.darlei.forumhub.dto.curso.CursoRequestDTO;
 import br.com.darlei.forumhub.dto.curso.CursoResponseDTO;
+import br.com.darlei.forumhub.dto.curso.AtualizacaoCursoDTO;
 import br.com.darlei.forumhub.service.CursoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ public class CursoController {
             UriComponentsBuilder uriBuilder) {
 
         CursoResponseDTO response = cursoService.cadastrar(dto);
-
         URI uri = uriBuilder.path("/cursos/{id}").buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
@@ -47,7 +47,8 @@ public class CursoController {
     @PutMapping("/{id}")
     public ResponseEntity<CursoResponseDTO> editar(
             @PathVariable UUID id,
-            @RequestBody @Valid CursoRequestDTO dto) {
+            @RequestBody @Valid AtualizacaoCursoDTO dto) {
+
         return ResponseEntity.ok(cursoService.atualizar(id, dto));
     }
 

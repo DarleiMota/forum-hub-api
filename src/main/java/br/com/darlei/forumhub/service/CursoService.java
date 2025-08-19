@@ -3,6 +3,7 @@ package br.com.darlei.forumhub.service;
 import br.com.darlei.forumhub.domain.curso.Curso;
 import br.com.darlei.forumhub.dto.curso.CursoRequestDTO;
 import br.com.darlei.forumhub.dto.curso.CursoResponseDTO;
+import br.com.darlei.forumhub.dto.curso.AtualizacaoCursoDTO;
 import br.com.darlei.forumhub.repository.CursoRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,16 +35,9 @@ public class CursoService {
 
     // CONSULTAS
     public CursoResponseDTO buscarPorId(UUID id) {
-        return new CursoResponseDTO(
-                cursoRepository.findById(id)
-                        .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado"))
-        );
-    }
-
-    public CursoResponseDTO buscarPorNomeExato(String nomeCurso) {
-        return cursoRepository.findByNomeCurso(nomeCurso)
+        return cursoRepository.findById(id)
                 .map(CursoResponseDTO::new)
-                .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado: " + nomeCurso));
+                .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado"));
     }
 
     // LISTAGEM DE TODOS
@@ -54,10 +48,11 @@ public class CursoService {
 
     // ATUALIZAÇÃO
     @Transactional
-    public CursoResponseDTO atualizar(UUID id, CursoRequestDTO dto) {
+    public CursoResponseDTO atualizar(UUID id, AtualizacaoCursoDTO dto) {
         Curso curso = cursoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado"));
 
+        // Checa se outro curso já tem esse nome
         if (!curso.getNomeCurso().equals(dto.nomeCurso()) &&
                 cursoRepository.existsByNomeCurso(dto.nomeCurso())) {
             throw new EntityExistsException("Já existe outro curso com este nome: " + dto.nomeCurso());
@@ -66,6 +61,8 @@ public class CursoService {
         curso.setNomeCurso(dto.nomeCurso());
         curso.setCategoria(dto.categoria());
 
+        // Salva antes de retornar
+        curso = cursoRepository.save(curso);
         return new CursoResponseDTO(curso);
     }
 
