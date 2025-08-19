@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -63,5 +64,14 @@ public class HandleErroController {
         body.put("erro", ex.getReason());
         body.put("timestamp", LocalDateTime.now());
         return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
+    // METODO PEGAR ERRO ANTES DO CONTROLLER
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Map<String, Object> erro = new HashMap<>();
+        erro.put("tipo", "Erro de conversão de parâmetro");
+        erro.put("mensagem", "Valor inválido para " + ex.getName() + ": " + ex.getValue());
+        return ResponseEntity.badRequest().body(erro);
     }
 }

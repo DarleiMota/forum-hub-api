@@ -53,8 +53,12 @@ public class TopicoService {
     }
 
     public Page<TopicoResponseDTO> listarPorCurso(String nomeCurso, Pageable pageable) {
-        return topicoRepository.findByCurso_NomeCurso(nomeCurso, pageable)
-                .map(TopicoResponseDTO::new);
+        Page<Topico> topicos = topicoRepository.findByCurso_NomeCurso(nomeCurso, pageable);
+        if (topicos.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Nenhum tópico encontrado para o curso: " + nomeCurso);
+        }
+        return topicos.map(TopicoResponseDTO::new);
     }
 
     public Page<TopicoResponseDTO> listarPorStatus(StatusTopico status, Pageable pageable) {
@@ -84,10 +88,14 @@ public class TopicoService {
         return topicos.map(TopicoResponseDTO::new);
     }
 
-    @Transactional
-    public TopicoResponseDTO atualizarTopico(UUID id, TopicoRequestDTO dados) {
+    public TopicoResponseDTO atualizarTopico(UUID id, TopicoRequestDTO dados, Usuario usuarioLogado) {
         Topico topico = topicoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tópico não encontrado"));
+
+        // Verifica se o usuário logado é o autor
+        if (!topico.getAutor().getId().equals(usuarioLogado.getId())) {
+            throw new SecurityException("Você não pode editar tópicos de outro usuário");
+        }
 
         if (dados.titulo() != null && !dados.titulo().isBlank()) {
             topico.setTitulo(dados.titulo());
@@ -101,13 +109,6 @@ public class TopicoService {
             Curso curso = cursoRepository.findById(dados.cursoId())
                     .orElseThrow(() -> new EntityNotFoundException("Curso não encontrado"));
             topico.setCurso(curso);
-        }
-
-        // Atualiza usuário se necessário
-        if (dados.autorId() != null) {
-            Usuario autor = usuarioRepository.findById(dados.autorId())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
-            topico.setAutor(autor);
         }
 
         return new TopicoResponseDTO(topico);

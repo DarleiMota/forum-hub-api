@@ -60,8 +60,8 @@ public class TokenService {
                     .withIssuedAt(Instant.now())
                     .withExpiresAt(dataExpiracao())
                     .sign(algorithm);
-        } catch (JWTCreationException exception) {
-            throw new TokenGenerationException("Falha ao gerar token JWT", exception);
+        } catch (JWTCreationException e) {
+            throw new IllegalStateException("Falha ao gerar token JWT", e);
         }
     }
 
@@ -77,12 +77,16 @@ public class TokenService {
                     .build()
                     .verify(tokenJWT)
                     .getSubject();
-        } catch (JWTVerificationException exception) {
-            throw new InvalidTokenException("Token JWT inválido ou expirado", exception);
+        } catch (JWTVerificationException e) {
+            throw new IllegalStateException("Token JWT inválido ou expirado", e);
         }
     }
 
     public Map<String, Claim> getClaims(String tokenJWT) {
+        if (tokenJWT == null || tokenJWT.isBlank()) {
+            throw new IllegalArgumentException("Token não pode ser nulo ou vazio");
+        }
+
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             DecodedJWT jwt = JWT.require(algorithm)
@@ -90,8 +94,8 @@ public class TokenService {
                     .build()
                     .verify(tokenJWT);
             return jwt.getClaims();
-        } catch (JWTVerificationException exception) {
-            throw new InvalidTokenException("Falha ao extrair claims do token", exception);
+        } catch (JWTVerificationException e) {
+            throw new IllegalStateException("Falha ao extrair claims do token", e);
         }
     }
 
@@ -99,17 +103,5 @@ public class TokenService {
         return LocalDateTime.now()
                 .plusHours(expirationHours)
                 .toInstant(ZoneOffset.of("-03:00"));
-    }
-}
-
-class TokenGenerationException extends RuntimeException {
-    public TokenGenerationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-
-class InvalidTokenException extends RuntimeException {
-    public InvalidTokenException(String message, Throwable cause) {
-        super(message, cause);
     }
 }
