@@ -23,6 +23,7 @@ public class AutenticacaoController {
     private final AutenticacaoService autenticacaoService;
     private final AuthenticationManager authenticationManager;
 
+    // LOGIN
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid LoginRequestDTO dados) {
         TokenResponseDTO token = autenticacaoService.login(dados, authenticationManager);

@@ -23,6 +23,7 @@ public class CursoController {
     @Autowired
     private CursoService cursoService;
 
+    // CRIAR CURSOS
     @PostMapping
     public ResponseEntity<CursoResponseDTO> cadastrar(
             @RequestBody @Valid CursoRequestDTO dto,
@@ -33,17 +34,20 @@ public class CursoController {
         return ResponseEntity.created(uri).body(response);
     }
 
+    // BUSCAR CURSOS
     @GetMapping("/{id}")
     public ResponseEntity<CursoResponseDTO> buscarCurso(@PathVariable UUID id) {
         return ResponseEntity.ok(cursoService.buscarPorId(id));
     }
 
+    // LISTAR TODOS OS CURSOS
     @GetMapping
     public ResponseEntity<Page<CursoResponseDTO>> listarCursos(
             @PageableDefault(sort = "nomeCurso") Pageable pageable) {
         return ResponseEntity.ok(cursoService.listarTodos(pageable));
     }
 
+    // BUSCAR CURSOS POR NOME
     @PutMapping("/{id}")
     public ResponseEntity<CursoResponseDTO> editar(
             @PathVariable UUID id,
@@ -52,6 +56,7 @@ public class CursoController {
         return ResponseEntity.ok(cursoService.atualizar(id, dto));
     }
 
+    // DELETAR CURSOS
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable UUID id) {
         cursoService.remover(id);

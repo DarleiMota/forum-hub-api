@@ -27,7 +27,7 @@ public class TopicoController {
     @Autowired
     private TopicoService topicoService;
 
-    // ----------------- CREATE -----------------
+    // CRIAR TOPICOS
     @PostMapping
     public ResponseEntity<TopicoResponseDTO> cadastrar(
             @RequestBody @Valid TopicoRequestDTO dados,
@@ -41,21 +41,21 @@ public class TopicoController {
                 dados.titulo(),
                 dados.mensagem(),
                 dados.cursoId(),
-                usuarioLogado.getId()
-        );
+                usuarioLogado.getId());
 
         var topico = topicoService.cadastrarTopico(request);
         var uri = builder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
         return ResponseEntity.created(uri).body(new TopicoResponseDTO(topico));
     }
 
-    // ----------------- READ -----------------
+    // BUSCAR TOPICOS
     @GetMapping("/{id}")
     public ResponseEntity<TopicoResponseDTO> buscarPorId(@PathVariable UUID id) {
         var topico = topicoService.buscarPorId(id);
         return ResponseEntity.ok(new TopicoResponseDTO(topico));
     }
 
+    // LISTAR TODOS OS TOPICOS
     @GetMapping
     public ResponseEntity<Page<TopicoResponseDTO>> listarTodos(
             @PageableDefault(sort = "titulo", direction = Sort.Direction.ASC) Pageable pageable) {
@@ -63,7 +63,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicos);
     }
 
-    // ----------------- FILTROS -----------------
+    // BUSCAS ESPECIFICAS
     @GetMapping("/por-curso/{nomeCurso}")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorCurso(
             @PathVariable String nomeCurso,
@@ -71,7 +71,8 @@ public class TopicoController {
         var topicos = topicoService.listarPorCurso(nomeCurso, pageable);
         return ResponseEntity.ok(topicos);
     }
-
+    
+    // BUSCAR TOPICOS POR STATUS
     @GetMapping("/por-status/{status}")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorStatus(
             @PathVariable StatusTopico status,
@@ -80,6 +81,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicos);
     }
 
+    // BUSCAR TOPICOS POR AUTOR
     @GetMapping("/por-autor/{autorId}")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorAutor(
             @PathVariable UUID autorId,
@@ -88,6 +90,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicos);
     }
 
+    // BUSCAR TOPICOS POR TEXTO
     @GetMapping("/buscar")
     public ResponseEntity<Page<TopicoResponseDTO>> buscarPorTexto(
             @RequestParam String texto,
@@ -96,6 +99,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicos);
     }
 
+    // BUSCAR TOPICOS POR CURSO E STATUS
     @GetMapping("/filtro-combinado")
     public ResponseEntity<Page<TopicoResponseDTO>> listarPorCursoEStatus(
             @RequestParam String nomeCurso,
@@ -105,7 +109,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicos);
     }
 
-    // ----------------- UPDATE -----------------
+    // ATUALIZAR TOPICOS
     @PutMapping("/{id}")
     public ResponseEntity<TopicoResponseDTO> atualizarTopico(
             @PathVariable UUID id,
@@ -117,7 +121,7 @@ public class TopicoController {
         return ResponseEntity.ok(topicoAtualizado);
     }
 
-    // ----------------- DELETE -----------------
+    // DELETAR TOPICOS
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirTopico(@PathVariable UUID id) {
         topicoService.excluirTopico(id);
